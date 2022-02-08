@@ -1,7 +1,13 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 import 'package:flutter_application_1/utility/my_constant.dart';
+import 'package:flutter_application_1/utility/my_dialog.dart';
 import 'package:flutter_application_1/widgets/show_imgae.dart';
 import 'package:flutter_application_1/widgets/show_title.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Authen extends StatefulWidget {
   const Authen({Key? key}) : super(key: key);
@@ -12,6 +18,9 @@ class Authen extends StatefulWidget {
 
 class _AuthenState extends State<Authen> {
   bool stateRedEye = true;
+  final formKey = GlobalKey<FormState>();
+  TextEditingController userController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +30,18 @@ class _AuthenState extends State<Authen> {
         child: GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(FocusNode()),
           behavior: HitTestBehavior.opaque,
-          child: ListView(
-            children: [
-              buildImage(iSize),
-              buildAppName(),
-              buildUser(iSize),
-              buildPassword(iSize),
-              buildLogin(iSize),
-              buildCreateAccount(),
-            ],
+          child: Form(
+            key: formKey,
+            child: ListView(
+              children: [
+                buildImage(iSize),
+                buildAppName(),
+                buildUser(iSize),
+                buildPassword(iSize),
+                buildLogin(iSize),
+                buildCreateAccount(),
+              ],
+            ),
           ),
         ),
       ),
@@ -63,12 +75,65 @@ class _AuthenState extends State<Authen> {
           // height: 50,
           child: ElevatedButton(
             style: MyConstant().myButtonStyle(),
-            onPressed: () {},
+            onPressed: () {
+              if (formKey.currentState!.validate() && passwordController.text.isEmpty!=true) {
+                String user = userController.text;
+                String password = passwordController.text;
+                print('## user = $user,password = $password');
+                checkAuthen(user, password);
+              }
+            },
             child: Text('Login'),
           ),
         ),
       ],
     );
+  }
+
+  Future<Null> checkAuthen(String? user, String? password) async {
+    String apiUrl =
+        '${MyConstant.domain}/getUserWhereUser.php?isAdd=true&user=$user&password=$password';
+    await Dio().get(apiUrl).then((value) async{
+      print('## value API = ==> $value');
+      if (value.toString() == 'null') {
+        MyDialog()
+            .normalDialog(context, 'User False', 'ไม่พบ $user ในฐานข้อมูล');
+      } else {
+        for (var item in json.decode(value.data)) {
+          UserModel model = UserModel.fromMap(item);
+          if (password == model.password) {
+            // Auth Success
+            String type = model.type;
+            print('Auth Success');
+            print('### Login by TYPE = $type');
+
+            SharedPreferences preferences = await SharedPreferences.getInstance();
+            preferences.setString('type', type);
+            preferences.setString('user', model.user);
+
+            switch (type) {
+              case 'buyer':
+                Navigator.pushNamedAndRemoveUntil(
+                    context, MyConstant.routeBuyerService, (route) => false);
+                break;
+              case 'seller':
+                Navigator.pushNamedAndRemoveUntil(
+                    context, MyConstant.routeSellerService, (route) => false);
+                break;
+              case 'rider':
+                Navigator.pushNamedAndRemoveUntil(
+                    context, MyConstant.routeRiderService, (route) => false);
+                break;
+              default:
+            }
+          } else {
+            //Auth False
+            MyDialog().normalDialog(
+                context, 'รหัสผ่านผิดพลาด', 'กรุณาลองใหม่าอีกครั้ง!');
+          }
+        }
+      }
+    });
   }
 
   Row buildUser(double iSize) {
@@ -79,6 +144,14 @@ class _AuthenState extends State<Authen> {
             margin: EdgeInsets.only(top: 16),
             width: iSize * 0.6,
             child: TextFormField(
+              controller: userController,
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'กรุณากรอก User ด้วยคะ';
+                } else {
+                  return null;
+                }
+              },
               decoration: InputDecoration(
                   labelStyle: MyConstant().h3Style(),
                   labelText: 'User : ',
@@ -91,7 +164,12 @@ class _AuthenState extends State<Authen> {
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: MyConstant.light),
                     borderRadius: BorderRadius.circular(30),
-                  )),
+                  ),
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
             )),
       ],
     );
@@ -105,6 +183,14 @@ class _AuthenState extends State<Authen> {
           margin: EdgeInsets.only(top: 16),
           width: iSize * 0.6,
           child: TextFormField(
+            controller: passwordController,
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'กรุณากรอก Password ด้วยคะ';
+              } else {
+                return null;
+              }
+            },
             obscureText: stateRedEye,
             decoration: InputDecoration(
               suffixIcon: IconButton(
@@ -126,6 +212,10 @@ class _AuthenState extends State<Authen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: MyConstant.light),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red),
                 borderRadius: BorderRadius.circular(30),
               ),
             ),

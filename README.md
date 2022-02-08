@@ -17,8 +17,13 @@ samples, guidance on mobile development, and a full API reference.
 
 ################################################
 
-#youtube เรียนรู้ล่าสุด https://www.youtube.com/watch?v=q825y0S_CPc&list=PLHk7DPiGKGNBDt1rPlVPCDVlV0ggqzbNy&index=18
-image picker *- https://www.youtube.com/watch?v=MSv38jO4EJk
+#youtube เรียนรู้ล่าสุด https://www.youtube.com/watch?v=t2nTBcDZpiw&list=PLHk7DPiGKGNBDt1rPlVPCDVlV0ggqzbNy&index=43
+
 #url tools
 - https://material.io/resources/color
-- https://storyset.com/
+- https://storyset.com
+- https://www.iconfinder.com
+
+
+#link more pubspec
+image picker  https://www.youtube.com/watch?v=MSv38jO4EJk
