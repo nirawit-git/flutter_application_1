@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utility/my_constant.dart';
+import 'package:flutter_application_1/utility/my_dialog.dart';
 import 'package:flutter_application_1/widgets/show_imgae.dart';
 import 'package:flutter_application_1/widgets/show_title.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,6 +39,11 @@ class _AddProductState extends State<AddProduct> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Product'),
+        actions: [
+          IconButton(
+              onPressed: () => processAddProduct(),
+              icon: Icon(Icons.cloud_upload))
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) => GestureDetector(
@@ -68,12 +76,42 @@ class _AddProductState extends State<AddProduct> {
       width: constraints.maxWidth * 0.7,
       child: ElevatedButton(
         onPressed: () {
-          if (formKey.currentState!.validate()) {}
+          processAddProduct();
         },
         child: Text('Add Product'),
         style: MyConstant().myButtonStyle(),
       ),
     );
+  }
+
+  Future<Null> processAddProduct() async {
+    if (formKey.currentState!.validate()) {
+      bool checkFile = true;
+      for (var i in files) {
+        if (i == null) {
+          checkFile = false;
+        }
+      }
+      if (checkFile) {
+        print('File 4 image ##seccess');
+        String urlApi = '${MyConstant.domain}/saveProduct.php';
+
+        for (var item in files) {
+          int i = Random().nextInt(10000000);
+          String nameFile = 'product${i}.jpg';
+          Map<String, dynamic> map = {};
+          map['file'] =
+              await MultipartFile.fromFile(item!.path, filename: nameFile);
+          FormData data = FormData.fromMap(map);
+          await Dio()
+              .post(urlApi, data: data)
+              .then((value) => print('upload success'));
+        }
+      } else {
+        MyDialog().normalDialog(
+            context, 'ข้อความแจ้งเตือน', 'กรุณาเลือกรูปภาพ ให้ครบด้วยคะ!');
+      }
+    }
   }
 
   Future<Null> processImagePicker(ImageSource source, int index) async {
@@ -84,7 +122,6 @@ class _AddProductState extends State<AddProduct> {
       setState(() {
         file = File(result!.path);
         files[index] = file;
-        print(files);
       });
     } catch (e) {}
   }
@@ -105,9 +142,9 @@ class _AddProductState extends State<AddProduct> {
                 leading: files[index] == null
                     ? Image.asset(MyConstant.cameraPhoto)
                     : Image.file(
-                  files[index]!,
-                  fit: BoxFit.cover,
-                ),
+                        files[index]!,
+                        fit: BoxFit.cover,
+                      ),
               ),
               actions: [
                 Row(
@@ -150,20 +187,19 @@ class _AddProductState extends State<AddProduct> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
-                Container(
-                  width: 48,
-                  height: 48,
-                  child: InkWell(
-                    onTap: () => chooseSourceImageDialog(0),
-                    child: files[0] == null
-                        ? Image.asset(MyConstant.cameraPhoto)
-                        : Image.file(
-                      files[0]!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+              Container(
+                width: 48,
+                height: 48,
+                child: InkWell(
+                  onTap: () => chooseSourceImageDialog(0),
+                  child: files[0] == null
+                      ? Image.asset(MyConstant.cameraPhoto)
+                      : Image.file(
+                          files[0]!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
+              ),
               Container(
                 width: 48,
                 height: 48,
@@ -172,9 +208,9 @@ class _AddProductState extends State<AddProduct> {
                   child: files[1] == null
                       ? Image.asset(MyConstant.cameraPhoto)
                       : Image.file(
-                    files[1]!,
-                    fit: BoxFit.cover,
-                  ),
+                          files[1]!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               Container(
@@ -185,9 +221,9 @@ class _AddProductState extends State<AddProduct> {
                   child: files[2] == null
                       ? Image.asset(MyConstant.cameraPhoto)
                       : Image.file(
-                    files[2]!,
-                    fit: BoxFit.cover,
-                  ),
+                          files[2]!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               Container(
@@ -198,9 +234,9 @@ class _AddProductState extends State<AddProduct> {
                   child: files[3] == null
                       ? Image.asset(MyConstant.cameraPhoto)
                       : Image.file(
-                    files[3]!,
-                    fit: BoxFit.cover,
-                  ),
+                          files[3]!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
             ],

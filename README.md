@@ -17,7 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ################################################
 
-#youtube เรียนรู้ล่าสุด https://www.youtube.com/watch?v=t2nTBcDZpiw&list=PLHk7DPiGKGNBDt1rPlVPCDVlV0ggqzbNy&index=43
+#youtube เรียนรู้ล่าสุด https://www.youtube.com/watch?v=vrDwiNJdgcs&list=PLHk7DPiGKGNBDt1rPlVPCDVlV0ggqzbNy&index=49
 
 #url tools
 - https://material.io/resources/color
